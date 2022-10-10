@@ -1,6 +1,7 @@
+import java.io.*;
 import java.math.BigInteger;
-import java.util.Scanner;
-
+import java.util.*;
+import java.io.FileReader;
 
 
 
@@ -14,6 +15,7 @@ public class Main{
     static int l2_writes = 0;
     static int l2_write_misses = 0;
     static String replacement_policy;
+    static String inclusion_poliocy;
     static int entry_time = 0;
 
     static int blocksize = 32;
@@ -144,7 +146,47 @@ public class Main{
     }
 
 
-    public static void main(String args[]){
+    public static void main(String args[]) throws IOException {
+        BufferedReader console = new BufferedReader(new FileReader("C://Users/ny525072/IdeaProjects/cache_simulator/src/validation0.txt"));
+        String line = console.readLine();
+        int count = 0;
+        ArrayList<Integer> cache_info = new ArrayList<>();
+        ArrayList<String> policies = new ArrayList<>();
+        while (line != null){
+            if (1 <= count && count <= 5) {
+                String[] str = line.split("\\s+");
+                cache_info.add((Integer.parseInt(str[1])));
+            }
+            else if (6 <= count && count <= 7) {
+                String[] str = line.split("\\s+");
+                policies.add(str[2]);
+            }
+            while (!line.equals("===== Simulation results (raw) =====")){
+                String[] str = line.split("\\s+");
+            }
+            // read next line
+            line = console.readLine();
+            count ++;
+        }
+        console.close();
+
+        blocksize = cache_info.get(0);
+        l1size = cache_info.get(1);
+        l1assoc = cache_info.get(2);
+        l2size = cache_info.get(3);
+        l2assoc = cache_info.get(4);
+        replacement_policy = policies.get(1);
+        inclusion_poliocy = policies.get(2);
+        String[][] l1set_contents = new String[l1sets][l1assoc];
+        String[][] l2set_contents = new String[l2sets][l2assoc];
+        for(int i = 0; i < l1sets; i++){
+            for(int j = 0; j < l1assoc; j++){
+                Block block = make_block("FF0040E0", 1);
+                l1cache[i][j] = block;
+            }
+        }
+
+
         Block block = make_block("FF0040E0", 1);
 //
 //        Block[][] l1cache = new Block[l1sets][l1assoc];
