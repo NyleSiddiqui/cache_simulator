@@ -1,5 +1,5 @@
 public class Block {
-    boolean valid;
+    boolean valid=false;
     boolean dirty;
     int entry_time;
     int LRU;

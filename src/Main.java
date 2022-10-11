@@ -16,25 +16,25 @@ public class Main{
     static int l2_write_misses = 0;
     static String replacement_policy;
     static String inclusion_poliocy;
-    static int entry_time = 0;
+    static int global_counter = 0;
 
-    static int blocksize = 32;
-    static int l1size = 256;
-    static int l1assoc = 1;
-    static int l2size = 8192;
-    static int l2assoc = 4;
-    static int l2sets = l2size / (l2assoc * blocksize);
-    static int l1sets = l1size / (l1assoc * blocksize);
+    static int blocksize;
+    static int l1size;
+    static int l1assoc;
+    static int l2size;
+    static int l2assoc ;
+    static int l2sets;
+    static int l1sets;
     static int LRU_serial = 1;
-    static Block[][] l1cache = new Block[l1sets][l1assoc];
-    static Block[][] l2cache = new Block[l2sets][l2assoc];
+    static Block[][] l1cache;
+    static Block[][] l2cache;
 
     public static Block make_block(String address_in, int cache_level){
         // index bits = log2(32) = 5
         // block offset bits - log2(16) = 4
         // tag =  32 - 9 = 23
-        String full_address = new BigInteger(address_in, 16).toString(2); // Convert hex address to binary string TODO: validate extra bit to make address 32 bits
-        if(full_address.length() == 31){
+        String full_address = new BigInteger(address_in, 16).toString(2); // Convert hex address to binary string
+        while(full_address.length() != 32){
             full_address = "0" + full_address;
         }
         if(cache_level == 1){
@@ -50,7 +50,7 @@ public class Main{
             new_block.tag = tag;
             new_block.block_index = block;
             new_block.set_index = decimal_index;
-            new_block.entry_time = entry_time;
+            new_block.entry_time = global_counter;
             return new_block;
 
         } else {
@@ -66,16 +66,19 @@ public class Main{
             new_block.tag = tag;
             new_block.block_index = block;
             new_block.set_index = decimal_index;
-            new_block.entry_time = entry_time;
+            new_block.entry_time = global_counter;
             new_block.LRU = 0;
             return new_block;
         }
     }
-    public void l1_read(Block new_block){
+    public static void l1_read(Block new_block){
         for(int i=0; i < l1assoc; i++){ // loop through each element in the new block's set to find block to be read
-            if(l1cache[new_block.set_index][i].tag.equals(new_block.tag) && l1cache[new_block.set_index][i].valid){
-                l1_reads++;
-                return;
+            if(l1cache[new_block.set_index][i].valid) {
+                if (l1cache[new_block.set_index][i].tag.equals(new_block.tag) && l1cache[new_block.set_index][i].valid) {
+                    l1_reads++;
+                    l1cache[new_block.set_index][i].LRU = 0;
+                    return;
+                }
             }
         }
         l1_read_misses++;
@@ -83,12 +86,20 @@ public class Main{
         //l2_read(new_block);
     }
 
-    public void l1_write(Block block, boolean allocate){
+    public static void l1_write(Block block, boolean allocate){
         if (!allocate){
-            for(int i=0; i< l1assoc; i++){
-                if(l1cache[block.set_index][i].tag.equals(block.tag) && !l1cache[block.set_index][i].valid){
-                    l1cache[block.set_index][i].valid = true;
+            for(int i=0; i<l1assoc; i++){
+                if (l1cache[block.set_index][i].valid){
+                    if (l1cache[block.set_index][i].tag.equals(block.tag)){
+                        l1cache[block.set_index][i].valid = true;
+                        l1cache[block.set_index][i].dirty = true;
+                        l1cache[block.set_index][i] = block;
+                        l1_writes++;
+                        return;
+                    }
+                } else {
                     l1cache[block.set_index][i] = block;
+                    l1cache[block.set_index][i].valid = true;
                     l1_writes++;
                     return;
                 }
@@ -100,6 +111,7 @@ public class Main{
                 for (int i=0; i < l1assoc; i++){
                     if(!l1cache[block.set_index][i].valid){
                         l1cache[block.set_index][i].valid = true;
+                        l1cache[block.set_index][i].dirty = true;
                         l1cache[block.set_index][i] = block;
                         l1_writes++;
                     }
@@ -124,7 +136,19 @@ public class Main{
             } else {
                 switch (replacement_policy) {
                     case "lru":
-                        System.out.println("pwacehowder");
+                        Block lru = l1cache[block.set_index][0];
+                        int assoc_index = 0;
+                        for (int i = 1; i < l1assoc; i++) {
+                            if (l1cache[block.set_index][i].LRU < lru.LRU){
+                                l1cache[block.set_index][i] = lru;
+                                assoc_index = i;
+                            }
+                        }
+
+                        if(lru.dirty){
+                            //l2_write(lru);
+                        }
+                        l1cache[lru.set_index][assoc_index] = block;
                     case "fifo":
                         int minimum = l1cache[block.set_index][0].entry_time;
                         Block victim = l1cache[block.set_index][0];
@@ -146,58 +170,80 @@ public class Main{
     }
 
 
+
     public static void main(String args[]) throws IOException {
-        BufferedReader console = new BufferedReader(new FileReader("C://Users/ny525072/IdeaProjects/cache_simulator/src/validation0.txt"));
+        blocksize = Integer.parseInt(args[0]);
+        l1size = Integer.parseInt(args[1]);
+        l1assoc = Integer.parseInt(args[2]);
+        l2size = Integer.parseInt(args[3]);
+        l2assoc = Integer.parseInt(args[4]);
+        replacement_policy = args[5];
+        inclusion_poliocy = args[6];
+        String trace_file = args[7];
+        l1sets = l1size / (l1assoc * blocksize);
+        if (l2size != 0) {
+            l2sets = l2size / (l2assoc * blocksize);
+        }
+
+        l1cache = new Block[l1sets][l1assoc];
+        l2cache = new Block[l2sets][l2assoc];
+
+        for(int i=0; i < l1sets; i++){
+            for(int j=0; j < l1assoc; j++){
+                l1cache[i][j] = new Block();
+            }
+        }
+
+//        String path = "C://Users/ny525072/IdeaProjects/cache_simulator/src/validation0.txt";
+        String path = "C:/School/School PhDizzle/CDA 5106/MachineProblem1/traces/gcc_trace.txt";
+        BufferedReader console = new BufferedReader(new FileReader(path));
         String line = console.readLine();
-        int count = 0;
-        ArrayList<Integer> cache_info = new ArrayList<>();
-        ArrayList<String> policies = new ArrayList<>();
+        String instruction;
+        String address;
         while (line != null){
-            if (1 <= count && count <= 5) {
-                String[] str = line.split("\\s+");
-                cache_info.add((Integer.parseInt(str[1])));
+            String[] trace = line.split("\\s+");
+            instruction = trace[0];
+            address = trace[1];
+            Block block = make_block(address, 1);
+
+            if (instruction.equals("r")){
+                l1_read(block);
             }
-            else if (6 <= count && count <= 7) {
-                String[] str = line.split("\\s+");
-                policies.add(str[2]);
+            else if (instruction.equals("w")){
+                l1_write(block, false);
             }
-            while (!line.equals("===== Simulation results (raw) =====")){
-                String[] str = line.split("\\s+");
-            }
-            // read next line
             line = console.readLine();
-            count ++;
+            global_counter++;
         }
         console.close();
-
-        blocksize = cache_info.get(0);
-        l1size = cache_info.get(1);
-        l1assoc = cache_info.get(2);
-        l2size = cache_info.get(3);
-        l2assoc = cache_info.get(4);
-        replacement_policy = policies.get(1);
-        inclusion_poliocy = policies.get(2);
-        String[][] l1set_contents = new String[l1sets][l1assoc];
-        String[][] l2set_contents = new String[l2sets][l2assoc];
-        for(int i = 0; i < l1sets; i++){
-            for(int j = 0; j < l1assoc; j++){
-                Block block = make_block("FF0040E0", 1);
-                l1cache[i][j] = block;
+        System.out.println("===== Simulator configuration =====");
+        System.out.println("BLOCKSIZE: " + blocksize);
+        System.out.println("L1_SIZE: " + l1size);
+        System.out.println("L1_ASSOC: " + l1assoc);
+        System.out.println("L2_SIZE: " + l2size);
+        System.out.println("L2_ASSOC: " + l2assoc);
+        System.out.println("REPLACEMENT POLICY: " + replacement_policy);
+        System.out.println("INCLUSION PROPERTY: " + inclusion_poliocy);
+        System.out.println("trace_file: " + trace_file);
+        System.out.println("===== L1 contents =====");
+        for(int i=0; i<l1sets; i++) {
+            System.out.print("SET " + i + "    ");
+            for (int j = 0; j < l1assoc; j++) {
+                String hex_add = new BigInteger(l1cache[i][j].tag, 2).toString(16);
+                while(hex_add.length() != 6){
+                    hex_add = "0" + hex_add;
+                }
+                System.out.print(hex_add + "   ");
+                if(l1cache[i][j].dirty){
+                    System.out.print(" D ");
+                }
             }
+            System.out.println();
         }
-
-
-        Block block = make_block("FF0040E0", 1);
-//
-//        Block[][] l1cache = new Block[l1sets][l1assoc];
-//        for(int i=0; i < l1sets; i++){
-//            for(int j=0; j < l1assoc; j++){
-//                l1cache[i][j] = new Block();
-//            }
-//        }
-//        System.out.println(l1cache);
-
-
-
+        System.out.println("===== Simulation results (raw) =====");
+        System.out.println("a. number of L1 reads: " + l1_reads);
+        System.out.println("b. number of L1 read misses: " + l1_read_misses);
+        System.out.println("c .number of L1 writes: " + l1_writes);
+        System.out.println("d. number of L1 write misses: " + l1_write_misses);
     }
 }
