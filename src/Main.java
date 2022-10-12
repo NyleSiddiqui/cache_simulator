@@ -14,6 +14,7 @@ public class Main{
     static int l2_read_misses = 0;
     static int l2_writes = 0;
     static int l2_write_misses = 0;
+    static int l1_writebacks = 0;
     static String replacement_policy;
     static String inclusion_poliocy;
     static int global_counter = 1;
@@ -62,7 +63,6 @@ public class Main{
             if(l1cache[new_block.set_index][i].valid) {
                 if (l1cache[new_block.set_index][i].tag.equals(new_block.tag)) {
                     l1cache[new_block.set_index][i].LRU = global_counter;
-                    l1cache[new_block.set_index][i].dirty = false;
                     return;
                 }
             }
@@ -84,15 +84,17 @@ public class Main{
                     }
                 }
                 if (lru.dirty) {
+                    l1_writebacks++;
                     //l2_write(lru);
                 }
                 l1cache[lru.set_index][assoc_index] = block;
-                l1cache[block.set_index][assoc_index].valid = true;
+                l1cache[lru.set_index][assoc_index].valid = true;
                 if (!read) {
-                    l1cache[block.set_index][assoc_index].dirty = true;
+                    l1cache[lru.set_index][assoc_index].dirty = true;
                     l1_write_misses++;
                 }
             }
+
             case "fifo" -> {
                 int minimum = l1cache[block.set_index][0].entry_time;
                 Block victim = l1cache[block.set_index][0];
@@ -102,11 +104,12 @@ public class Main{
                     }
                 }
                 if (victim.dirty) {
-                    //l2_write(victim);
+                    l1_writebacks++;
                 }
                 //l2_read();
                 return;
             }
+
             case "optimal" -> System.out.println("pwacehowder");
         }
     }
@@ -135,7 +138,6 @@ public class Main{
                 System.out.println("pwacehowder");
                 //TODO: l2_write();
             }
-
     }
 
 
@@ -215,8 +217,9 @@ public class Main{
         System.out.println("===== Simulation results (raw) =====");
         System.out.println("a. number of L1 reads: " + l1_reads);
         System.out.println("b. number of L1 read misses: " + l1_read_misses);
-        System.out.println("c .number of L1 writes: " + l1_writes);
+        System.out.println("c. number of L1 writes: " + l1_writes);
         System.out.println("d. number of L1 write misses: " + l1_write_misses);
+        System.out.println("f. number of L1 writebacks: " + l1_writebacks);
         System.out.println(global_counter);
     }
 }
