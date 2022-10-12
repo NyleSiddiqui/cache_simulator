@@ -16,7 +16,7 @@ public class Main{
     static int l2_write_misses = 0;
     static String replacement_policy;
     static String inclusion_poliocy;
-    static int global_counter = 0;
+    static int global_counter = 1;
 
     static int blocksize;
     static int l1size;
@@ -74,26 +74,26 @@ public class Main{
 
     public static void replacement(Block block, boolean read){
         switch (replacement_policy) {
-            case "lru":
+            case "lru" -> {
                 Block lru = l1cache[block.set_index][0];
                 int assoc_index = 0;
                 for (int i = 1; i < l1assoc; i++) {
-                    if ((global_counter - l1cache[block.set_index][i].LRU) > (global_counter - lru.LRU)){
+                    if ((global_counter - l1cache[block.set_index][i].LRU) > (global_counter - lru.LRU)) {
                         lru = l1cache[block.set_index][i];
                         assoc_index = i;
                     }
                 }
-
-                if(lru.dirty){
+                if (lru.dirty) {
                     //l2_write(lru);
                 }
                 l1cache[lru.set_index][assoc_index] = block;
-                if(!read) {
+                l1cache[block.set_index][assoc_index].valid = true;
+                if (!read) {
+                    l1cache[block.set_index][assoc_index].dirty = true;
                     l1_write_misses++;
                 }
-                return;
-
-            case "fifo":
+            }
+            case "fifo" -> {
                 int minimum = l1cache[block.set_index][0].entry_time;
                 Block victim = l1cache[block.set_index][0];
                 for (int i = 1; i < l1assoc; i++) {
@@ -106,8 +106,8 @@ public class Main{
                 }
                 //l2_read();
                 return;
-            case "optimal":
-                System.out.println("pwacehowder");
+            }
+            case "optimal" -> System.out.println("pwacehowder");
         }
     }
 
@@ -119,9 +119,11 @@ public class Main{
                     l1cache[block.set_index][i].LRU = global_counter;
                     if(!read) {
                         l1cache[block.set_index][i].dirty = true;
+                        l1_write_misses++;
                     }
                     return;
                 } else if (l1cache[block.set_index][i].tag.equals(block.tag)) {
+                    l1cache[block.set_index][i].dirty = true;
                     l1cache[block.set_index][i].LRU = global_counter;
                     return;
                 }
@@ -161,14 +163,13 @@ public class Main{
             }
         }
 
-//        String path = "C://Users/ny525072/IdeaProjects/cache_simulator/src/validation0.txt";
-        String path = "C:/School/School PhDizzle/CDA 5106/MachineProblem1/traces/gcc_trace.txt";
+        String path = "C://Users/ny525072/IdeaProjects/cache_simulator/MachineProblem1/traces/gcc_trace.txt";
+        //String path = "C:/School/School PhDizzle/CDA 5106/MachineProblem1/traces/gcc_trace.txt";
         BufferedReader console = new BufferedReader(new FileReader(path));
         String line = console.readLine();
         String instruction;
         String address;
         while (line != null){
-            global_counter++;
             String[] trace = line.split("\\s+");
             instruction = trace[0];
             address = trace[1];
@@ -183,6 +184,7 @@ public class Main{
                 l1_write(block, false);
             }
             line = console.readLine();
+            global_counter++;
 
         }
         console.close();
