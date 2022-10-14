@@ -6,4 +6,5 @@ public class Block {
     String block_index;
     int set_index;
     String tag;
+    String full_address;
 }
