@@ -15,6 +15,7 @@ public class Main{
     static int l2_writes = 0;
     static int l2_write_misses = 0;
     static int l1_writebacks = 0;
+    static int l2_writebacks = 0;
     static String replacement_policy;
     static String inclusion_poliocy;
     static int global_counter = 1;
@@ -33,7 +34,10 @@ public class Main{
         // index bits = log2(32) = 5
         // block offset bits - log2(16) = 4
         // tag =  32 - 9 = 23
-        String full_address = new BigInteger(address_in, 16).toString(2); // Convert hex address to binary string
+        String full_address = address_in;
+        if (cache_level == 1) {
+            full_address = new BigInteger(address_in, 16).toString(2); // Convert hex address to binary string
+        }
         while(full_address.length() != 32){
             full_address = "0" + full_address;
         }
@@ -55,7 +59,83 @@ public class Main{
         new_block.block_index = block;
         new_block.set_index = decimal_index;
         new_block.entry_time = new_block.LRU = global_counter;
+        new_block.full_address = full_address;
         return new_block;
+    }
+
+
+
+    public static void replacement(Block block, boolean read, int level){
+        switch (replacement_policy) {
+            case "lru":
+                if(level == 1) {
+                    Block lru = l1cache[block.set_index][0];
+                    int assoc_index = 0;
+                    for (int i = 1; i < l1assoc; i++) {
+                        if ((global_counter - l1cache[block.set_index][i].LRU) > (global_counter - lru.LRU)) {
+                            lru = l1cache[block.set_index][i];
+                            assoc_index = i;
+                        }
+                    }
+                    if (lru.dirty) {
+                        l1_writebacks++;
+                        if (l2size != 0) {
+                            Block temp = make_block(lru.full_address, 2);
+                            l2_write(temp, false);
+                        }
+                    }
+                    l1cache[lru.set_index][assoc_index] = block;
+                    l1cache[lru.set_index][assoc_index].valid = true;
+                    if (!read) {
+                        l1cache[lru.set_index][assoc_index].dirty = true;
+                        l1_write_misses++;
+                    }
+                    return;
+                } else {
+                    Block lru = l2cache[block.set_index][0];
+                    int assoc_index = 0;
+                    for (int i = 1; i < l2assoc; i++) {
+                        if ((global_counter - l2cache[block.set_index][i].LRU) > (global_counter - lru.LRU)) {
+                            lru = l2cache[block.set_index][i];
+                            assoc_index = i;
+                        }
+                    }
+                    if (lru.dirty) {
+                        l2_writebacks++;
+                    }
+                    l2cache[lru.set_index][assoc_index] = block;
+                    l2cache[lru.set_index][assoc_index].valid = true;
+                    if (!read) {
+                        l2cache[lru.set_index][assoc_index].dirty = true;
+                        l2_write_misses++;
+                    }
+                    return;
+                }
+
+            case "fifo":
+                int minimum = l1cache[block.set_index][0].entry_time;
+                Block victim = l1cache[block.set_index][0];
+                int assoc_index = 0;
+                for (int i = 1; i < l1assoc; i++) {
+                    if (l1cache[block.set_index][i].entry_time < minimum) {
+                        victim = l1cache[block.set_index][i];
+                        assoc_index = i;
+                    }
+                }
+                if (victim.dirty) {
+                    l1_writebacks++;
+                }
+                l1cache[victim.set_index][assoc_index] = block;
+                l1cache[victim.set_index][assoc_index].valid = true;
+                if (!read) {
+                    l1cache[victim.set_index][assoc_index].dirty = true;
+                    l1_write_misses++;
+                }
+                //l2_read();
+                return;
+
+            case "optimal" : System.out.println("pwacehowder");
+        }
     }
 
     public static void l1_read(Block new_block){
@@ -68,76 +148,74 @@ public class Main{
             }
         }
         l1_read_misses++;
-        l1_write(new_block, true);
-        //l2_read(new_block);
-    }
-
-    public static void replacement(Block block, boolean read){
-        switch (replacement_policy) {
-            case "lru" -> {
-                Block lru = l1cache[block.set_index][0];
-                int assoc_index = 0;
-                for (int i = 1; i < l1assoc; i++) {
-                    if ((global_counter - l1cache[block.set_index][i].LRU) > (global_counter - lru.LRU)) {
-                        lru = l1cache[block.set_index][i];
-                        assoc_index = i;
-                    }
-                }
-                if (lru.dirty) {
-                    l1_writebacks++;
-                    //l2_write(lru);
-                }
-                l1cache[lru.set_index][assoc_index] = block;
-                l1cache[lru.set_index][assoc_index].valid = true;
-                if (!read) {
-                    l1cache[lru.set_index][assoc_index].dirty = true;
-                    l1_write_misses++;
-                }
-            }
-
-            case "fifo" -> {
-                int minimum = l1cache[block.set_index][0].entry_time;
-                Block victim = l1cache[block.set_index][0];
-                for (int i = 1; i < l1assoc; i++) {
-                    if (l1cache[block.set_index][i].entry_time < minimum) {
-                        victim = l1cache[block.set_index][i];
-                    }
-                }
-                if (victim.dirty) {
-                    l1_writebacks++;
-                }
-                //l2_read();
-                return;
-            }
-
-            case "optimal" -> System.out.println("pwacehowder");
+        if (l2size == 0) {
+            l1_write(new_block, true);
+        } else {
+            new_block = make_block(new_block.full_address, 2);
+            l2_read(new_block);
         }
     }
 
     public static void l1_write(Block block, boolean read){
-            for (int i = 0; i < l1assoc; i++) {
-                if (!l1cache[block.set_index][i].valid) {
-                    l1cache[block.set_index][i] = block;
-                    l1cache[block.set_index][i].valid = true;
-                    l1cache[block.set_index][i].LRU = global_counter;
-                    if(!read) {
-                        l1cache[block.set_index][i].dirty = true;
-                        l1_write_misses++;
-                    }
-                    return;
-                } else if (l1cache[block.set_index][i].tag.equals(block.tag)) {
+        for (int i = 0; i < l1assoc; i++) {
+            if (!l1cache[block.set_index][i].valid) {
+                l1cache[block.set_index][i] = block;
+                l1cache[block.set_index][i].valid = true;
+                l1cache[block.set_index][i].LRU = global_counter;
+                if(!read) {
                     l1cache[block.set_index][i].dirty = true;
-                    l1cache[block.set_index][i].LRU = global_counter;
+                    l1_write_misses++;
+                }
+                return;
+            } else if (l1cache[block.set_index][i].tag.equals(block.tag)) {
+                l1cache[block.set_index][i].dirty = true;
+                l1cache[block.set_index][i].LRU = global_counter;
+                return;
+            }
+        }
+        // all blocks in the set are valid and not equal to new block tag
+        replacement(block, read, 1);
+        if (l2size != 0) {
+            block = make_block(block.full_address, 2);
+            l2_read(block);
+        }
+    }
+
+    public static void l2_read(Block block){
+        l2_reads++;
+        for(int i=0; i < l2assoc; i++){ // loop through each element in the new block's set to find block to be read
+            if(l2cache[block.set_index][i].valid) {
+                if (l2cache[block.set_index][i].tag.equals(block.tag)) {
+                    l2cache[block.set_index][i].LRU = global_counter;
                     return;
                 }
             }
-            // all blocks in the set are valid and not equal to new block tag
-            if (l2size == 0){
-                replacement(block, read);
-            } else {
-                System.out.println("pwacehowder");
-                //TODO: l2_write();
+        }
+        l2_read_misses++;
+        block = make_block(block.full_address, 2);
+        l2_write(block, true);
+    }
+
+    public static void l2_write(Block block, boolean read){
+        l2_writes++;
+        for (int i = 0; i < l2assoc; i++) {
+            if (!l2cache[block.set_index][i].valid) {
+                l2cache[block.set_index][i] = block;
+                l2cache[block.set_index][i].valid = true;
+                l2cache[block.set_index][i].LRU = global_counter;
+                if(!read) {
+                    l2cache[block.set_index][i].dirty = true;
+                    l2_write_misses++;
+                }
+                return;
+            } else if (l2cache[block.set_index][i].tag.equals(block.tag)) {
+                l2cache[block.set_index][i].dirty = true;
+                l2cache[block.set_index][i].LRU = global_counter;
+                return;
             }
+        }
+        // all blocks in the set are valid and not equal to new block tag
+        replacement(block, read, 2);
     }
 
 
@@ -151,22 +229,27 @@ public class Main{
         replacement_policy = args[5];
         inclusion_poliocy = args[6];
         String trace_file = args[7];
+
         l1sets = l1size / (l1assoc * blocksize);
-        if (l2size != 0) {
-            l2sets = l2size / (l2assoc * blocksize);
-        }
-
         l1cache = new Block[l1sets][l1assoc];
-        l2cache = new Block[l2sets][l2assoc];
-
         for(int i=0; i < l1sets; i++){
             for(int j=0; j < l1assoc; j++){
                 l1cache[i][j] = new Block();
             }
         }
 
-        String path = "C://Users/ny525072/IdeaProjects/cache_simulator/MachineProblem1/traces/gcc_trace.txt";
-        //String path = "C:/School/School PhDizzle/CDA 5106/MachineProblem1/traces/gcc_trace.txt";
+        if (l2size != 0) {
+            l2sets = l2size / (l2assoc * blocksize);
+            l2cache = new Block[l2sets][l2assoc];
+            for(int i=0; i < l2sets; i++){
+                for(int j=0; j < l2assoc; j++){
+                    l2cache[i][j] = new Block();
+                }
+            }
+        }
+
+        //String path = "C://Users/ny525072/IdeaProjects/cache_simulator/MachineProblem1/traces/gcc_trace.txt";
+        String path = "C:/School/School PhDizzle/CDA 5106/MachineProblem1/traces/gcc_trace.txt";
         BufferedReader console = new BufferedReader(new FileReader(path));
         String line = console.readLine();
         String instruction;
@@ -209,6 +292,21 @@ public class Main{
                 }
                 System.out.print(hex_add + "   ");
                 if(l1cache[i][j].dirty){
+                    System.out.print(" D ");
+                }
+            }
+            System.out.println();
+        }
+        System.out.println("===== L2 contents =====");
+        for(int k = 0; k < l2sets; k++){
+            System.out.print("SET " + k + "    ");
+            for (int j = 0; j < l2assoc; j++) {
+                String hex_add = new BigInteger(l2cache[k][j].tag, 2).toString(16);
+                while(hex_add.length() != 6){
+                    hex_add = "0" + hex_add;
+                }
+                System.out.print(hex_add + "   ");
+                if(l2cache[k][j].dirty){
                     System.out.print(" D ");
                 }
             }
