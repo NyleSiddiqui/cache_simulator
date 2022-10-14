@@ -81,7 +81,7 @@ public class Main{
                         l1_writebacks++;
                         if (l2size != 0) {
                             Block temp = make_block(lru.full_address, 2);
-                            l2_write(temp, false);
+                            l2_write(temp, true);
                         }
                     }
                     l1cache[lru.set_index][assoc_index] = block;
@@ -105,10 +105,7 @@ public class Main{
                     }
                     l2cache[lru.set_index][assoc_index] = block;
                     l2cache[lru.set_index][assoc_index].valid = true;
-                    if (!read) {
-                        l2cache[lru.set_index][assoc_index].dirty = true;
-                        l2_write_misses++;
-                    }
+                    l2cache[lru.set_index][assoc_index].dirty = true;
                     return;
                 }
 
@@ -174,28 +171,33 @@ public class Main{
         }
         // all blocks in the set are valid and not equal to new block tag
         replacement(block, read, 1);
-        if (l2size != 0) {
+        if (l2size != 0 && !read) {
             block = make_block(block.full_address, 2);
             l2_read(block);
         }
     }
 
     public static void l2_read(Block block){
+        l2_reads++;
         for(int i=0; i < l2assoc; i++){ // loop through each element in the new block's set to find block to be read
             if(l2cache[block.set_index][i].valid) {
                 if (l2cache[block.set_index][i].tag.equals(block.tag)) {
                     l2cache[block.set_index][i].LRU = global_counter;
-                    l2_reads++;
                     return;
                 }
             }
         }
         l2_read_misses++;
-        l2_write(block, true);
     }
 
     public static void l2_write(Block block, boolean read){
+        l2_writes++;
         for (int i = 0; i < l2assoc; i++) {
+            if (l2cache[block.set_index][i].valid && l2cache[block.set_index][i].tag.equals(block.tag)){
+//                l2cache[block.set_index][i].dirty = true;
+                l2cache[block.set_index][i].LRU = global_counter;
+                return;
+            }
             if (!l2cache[block.set_index][i].valid) {
                 l2cache[block.set_index][i] = block;
                 l2cache[block.set_index][i].valid = true;
@@ -205,15 +207,10 @@ public class Main{
                     l2_write_misses++;
                 }
                 return;
-            } else if (l2cache[block.set_index][i].tag.equals(block.tag)) {
-                l2cache[block.set_index][i].dirty = true;
-                l2_writes++;
-                l2cache[block.set_index][i].LRU = global_counter;
-                return;
             }
         }
-        // all blocks in the set are valid and not equal to new block tag
         l2_write_misses++;
+        // all blocks in the set are valid and not equal to new block tag
         replacement(block, read, 2);
     }
 
