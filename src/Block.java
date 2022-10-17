@@ -1,3 +1,4 @@
+
 public class Block {
     boolean valid=false;
     boolean dirty;
@@ -7,4 +8,5 @@ public class Block {
     int set_index;
     String tag;
     String full_address;
+    int optimal = -1;
 }
