@@ -2,13 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7cd09690-569d-4f9b-8d37-6be38760bcf7" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/debug0.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/gcc_trace.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/validation0.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/MachineProblem1/Block.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/MachineProblem1/Block.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/MachineProblem1/Main.class" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Block.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Block.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.java" afterDir="false" />
     </list>
@@ -23,32 +17,32 @@
     <session id="1996111696">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="5" />
+          <entry key="project.closed" value="6" />
           <entry key="project.open.time.2" value="1" />
           <entry key="project.open.time.5" value="1" />
           <entry key="project.open.time.6" value="4" />
-          <entry key="project.open.time.7" value="1" />
-          <entry key="project.opened" value="7" />
+          <entry key="project.open.time.7" value="2" />
+          <entry key="project.opened" value="8" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="java" value="11" />
+          <entry key="java" value="14" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="JAVA" value="11" />
+          <entry key="JAVA" value="14" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="java" value="11949" />
+          <entry key="java" value="12758" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="JAVA" value="11949" />
+          <entry key="JAVA" value="12758" />
         </counts>
       </usages-collector>
     </session>
@@ -58,8 +52,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Main.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="479">
-              <caret line="390" column="24" lean-forward="true" selection-start-line="390" selection-start-column="24" selection-end-line="390" selection-end-column="24" />
+            <state relative-caret-position="373">
+              <caret line="149" column="76" selection-start-line="149" selection-start-column="76" selection-end-line="149" selection-end-column="76" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -70,8 +64,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/Block.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="170">
-              <caret line="10" column="21" selection-start-line="10" selection-start-column="21" selection-end-line="10" selection-end-column="21" />
+            <state relative-caret-position="51">
+              <caret line="3" column="17" lean-forward="true" selection-start-line="3" selection-start-column="17" selection-end-line="3" selection-end-column="17" />
             </state>
           </provider>
         </entry>
@@ -94,13 +88,17 @@
       <find>l2_read_misses</find>
       <find>int</find>
       <find>1</find>
+      <find>+1</find>
+      <find>(int)</find>
       <find>global_counter</find>
+      <find>.lru</find>
     </findStrings>
     <replaceStrings>
       <replace>1</replace>
       <replace>duble</replace>
       <replace>double</replace>
       <replace>2</replace>
+      <replace>global_counter + call</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -117,8 +115,8 @@
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="63" />
-    <option name="y" value="-22" />
+    <option name="x" value="62" />
+    <option name="y" value="-23" />
     <option name="width" value="1300" />
     <option name="height" value="1400" />
   </component>
@@ -127,14 +125,33 @@
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
-    <panes />
+    <panes>
+      <pane id="PackagesPane" />
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="MachineProblem1" type="b2602c69:ProjectViewProjectNode" />
+              <item name="MachineProblem1" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="MachineProblem1" type="b2602c69:ProjectViewProjectNode" />
+              <item name="MachineProblem1" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+      <pane id="Scope" />
+    </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1665988929093" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1666079824309" />
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.0" />
     <property name="project.structure.side.proportion" value="0.0" />
-    <property name="settings.editor.selected.configurable" value="preferences.editor" />
+    <property name="settings.editor.selected.configurable" value="preferences.keymap" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -152,7 +169,7 @@
     <configuration name="Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="Main" />
       <module name="MachineProblem1" />
-      <option name="PROGRAM_PARAMETERS" value="16 1024 2 0 0 2 0 gcc_trace.txt" />
+      <option name="PROGRAM_PARAMETERS" value="16 1024 2 8192 4 0 0 gcc_trace.txt" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -189,15 +206,15 @@
       <window_info id="Favorites" order="6" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.91608393" weight="0.18227594" />
-      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.15005036" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.91608393" visible="true" weight="0.45015106" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.110775426" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="Terminal" order="7" weight="0.34138972" />
-      <window_info anchor="bottom" id="Event Log" order="8" sideWeight="0.08391608" side_tool="true" weight="0.28700906" />
-      <window_info anchor="bottom" id="Version Control" order="9" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Messages" order="10" weight="0.32930514" />
+      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.08391608" side_tool="true" weight="0.28700906" />
+      <window_info anchor="bottom" id="Version Control" order="8" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Messages" order="9" weight="0.32930514" />
+      <window_info anchor="bottom" id="Terminal" order="10" weight="0.32930514" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -243,13 +260,81 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
+          <condition expression="global_counter == 90280 || global_counter == 90279 || global_counter == 99971 || global_counter == 99970" language="JAVA" />
           <url>file://$PROJECT_DIR$/src/Main.java</url>
-          <line>412</line>
+          <line>447</line>
           <properties />
-          <option name="timeStamp" value="9" />
+          <option name="timeStamp" value="10" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
+    <watches-manager>
+      <configuration name="Application">
+        <watch expression="global_counter = 2552" language="JAVA" />
+        <watch expression="global_counter = 2552" language="JAVA" />
+      </configuration>
+    </watches-manager>
+  </component>
+  <component name="debuggerHistoryManager">
+    <expressions id="breakpointCondition">
+      <expression>
+        <expression-string>global_counter == 90280 || global_counter == 90279 || global_counter == 99971 || global_counter == 99970</expression-string>
+        <language-id>JAVA</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>global_counter == 31313 || global_counter == 31312 || global_counter == 37404 || global_counter == 37403 || global_counter == 71879 || global_counter == 71878 || global_counter == 84459 || global_counter == 84458 || global_counter == 88675 || global_counter == 88674</expression-string>
+        <language-id>JAVA</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>global_counter == 31313 || global_counter == 31312 || global_counter == 37404 || global_counter == 37403 || global_counter == 71879 || global_counter == 71878 || global_counter == 84459 || global_counter == 84458 || global_counter == 84459 || global_counter == 84458</expression-string>
+        <language-id>JAVA</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>global_counter == 31313 || global_counter == 31312 || global_counter == 37404 || global_counter == 37403 || global_counter == 71879 || global_counter == 71878 || global_counter == 31313 || global_counter == 31312</expression-string>
+        <language-id>JAVA</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>global_counter == 31313 || global_counter == 31312 || global_counter == 37404 || global_counter == 37403 || global_counter == 71879 || global_counter == 71878</expression-string>
+        <language-id>JAVA</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>global_counter == 28815 || global_counter == 28814</expression-string>
+        <language-id>JAVA</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>global_counter == 17404 || global_counter == 17403</expression-string>
+        <language-id>JAVA</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>global_counter == 1312 || global_counter == 1313</expression-string>
+        <language-id>JAVA</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>global_counter == 99971 || global_counter == 99970</expression-string>
+        <language-id>JAVA</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>global_counter == 2551 || global_counter == 2552 || global_counter == 17404 || global_counter == 17403</expression-string>
+        <language-id>JAVA</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+    </expressions>
+    <expressions id="watch">
+      <expression>
+        <expression-string>global_counter = 2552</expression-string>
+        <language-id>JAVA</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+    </expressions>
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/src/Cache.java">
@@ -268,15 +353,15 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Block.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="170">
-          <caret line="10" column="21" selection-start-line="10" selection-start-column="21" selection-end-line="10" selection-end-column="21" />
+        <state relative-caret-position="51">
+          <caret line="3" column="17" lean-forward="true" selection-start-line="3" selection-start-column="17" selection-end-line="3" selection-end-column="17" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Main.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="479">
-          <caret line="390" column="24" lean-forward="true" selection-start-line="390" selection-start-column="24" selection-end-line="390" selection-end-column="24" />
+        <state relative-caret-position="373">
+          <caret line="149" column="76" selection-start-line="149" selection-start-column="76" selection-end-line="149" selection-end-column="76" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
