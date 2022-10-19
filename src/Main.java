@@ -6,8 +6,6 @@ import java.io.FileReader;
 
 
 public class Main{
-    static int call = 0;
-    static int equal = 0;
     static int l1_reads = 0;
     static int l1_read_misses = 0;
     static int l1_writes = 0;
@@ -59,7 +57,8 @@ public class Main{
         new_block.block_index = block;
         new_block.set_index = decimal_index;
         new_block.entry_time =  global_counter;
-        new_block.LRU = global_counter;
+        new_block.LRU = lru_global_counter;
+        lru_global_counter++;
         new_block.full_address = full_address;
         if (replacement_policy.equals("optimal")){
             new_block.optimal = optimal;
@@ -68,7 +67,7 @@ public class Main{
     }
     public static Block l1tol2(Block block){
         Block temp = new Block();
-        temp.LRU = block.LRU;
+        temp.LRU = lru_global_counter;
         temp.dirty = block.dirty;
         temp.valid = block.valid;
         temp.entry_time = block.entry_time;
@@ -98,6 +97,8 @@ public class Main{
                 }
                 l1cache[block.set_index][i].valid = false;
                 l1cache[block.set_index][i].tag = "-1";
+                l1cache[block.set_index][i].set_index = -1;
+                l1cache[block.set_index][i].dirty = false;
             }
         }
     }
@@ -133,7 +134,7 @@ public class Main{
                     Block lru = l2cache[block.set_index][0];
                     int assoc_index = 0;
                     for (int i = 1; i < l2assoc; i++) {
-                        if (l2cache[block.set_index][i].LRU <= lru.LRU) {
+                        if (l2cache[block.set_index][i].LRU < lru.LRU) {
                             lru = l2cache[block.set_index][i];
                             assoc_index = i;
                         }
@@ -143,6 +144,7 @@ public class Main{
                     }
                     l2cache[lru.set_index][assoc_index] = block;
                     l2cache[lru.set_index][assoc_index].valid = true;
+                    l2cache[lru.set_index][assoc_index].dirty = false;
                     if(!read) {
                         l2cache[lru.set_index][assoc_index].dirty = true;
                         l2_write_misses++;
@@ -256,11 +258,11 @@ public class Main{
     }
 
     public static void l1_read(Block new_block){
-        call++;
         for(int i=0; i < l1assoc; i++){ // loop through each element in the new block's set to find block to be read
             if(l1cache[new_block.set_index][i].valid) {
                 if (l1cache[new_block.set_index][i].tag.equals(new_block.tag)) {
-                    l1cache[new_block.set_index][i].LRU = global_counter;
+                    l1cache[new_block.set_index][i].LRU = lru_global_counter;
+                    lru_global_counter++;
                     return;
                 }
             }
@@ -275,14 +277,13 @@ public class Main{
 
 
     public static void l2_read(Block block, boolean read){
-        call++;
         if(!read) {
             l2_reads++;
         }
         for(int i=0; i < l2assoc; i++){ // loop through each element in the new block's set to find block to be read
             if(l2cache[block.set_index][i].valid) {
                 if (l2cache[block.set_index][i].tag.equals(block.tag)) {
-                    l2cache[block.set_index][i].LRU = global_counter + lru_global_counter;
+                    l2cache[block.set_index][i].LRU = lru_global_counter;
                     lru_global_counter++;
                     return;
                 }
@@ -293,13 +294,24 @@ public class Main{
     }
 
     public static void l1_write(Block block, boolean read){
-        call++;
+        for (int i = 0; i < l1assoc; i++) {
+            if (l1cache[block.set_index][i].valid) {
+                if (l1cache[block.set_index][i].tag.equals(block.tag)) {
+                    l1cache[block.set_index][i].dirty = true;
+                    l1cache[block.set_index][i].LRU = lru_global_counter;
+                    lru_global_counter++;
+                    return;
+                }
+
+            }
+        }
         for (int i = 0; i < l1assoc; i++) {
             if (!l1cache[block.set_index][i].valid) {
                 l1cache[block.set_index][i] = block;
                 l1cache[block.set_index][i].valid = true;
-                l1cache[block.set_index][i].LRU = global_counter;
-                if(!read) {
+                l1cache[block.set_index][i].LRU = lru_global_counter;
+                lru_global_counter++;
+                if (!read) {
                     l1cache[block.set_index][i].dirty = true;
                     l1_write_misses++;
                     if (l2size != 0) {
@@ -308,12 +320,32 @@ public class Main{
                     }
                 }
                 return;
-            } else if (l1cache[block.set_index][i].tag.equals(block.tag)) {
-                l1cache[block.set_index][i].dirty = true;
-                l1cache[block.set_index][i].LRU = global_counter;
-                return;
             }
         }
+
+
+//        for (int i = 0; i < l1assoc; i++) {
+//            if (!l1cache[block.set_index][i].valid) {
+//                l1cache[block.set_index][i] = block;
+//                l1cache[block.set_index][i].valid = true;
+//                l1cache[block.set_index][i].LRU = lru_global_counter;
+//                lru_global_counter++;
+//                if(!read) {
+//                    l1cache[block.set_index][i].dirty = true;
+//                    l1_write_misses++;
+//                    if (l2size != 0) {
+//                        Block temp = l1tol2(block);
+//                        l2_read(temp, false);
+//                    }
+//                }
+//                return;
+//            } else if (l1cache[block.set_index][i].tag.equals(block.tag)) {
+//                l1cache[block.set_index][i].dirty = true;
+//                l1cache[block.set_index][i].LRU = lru_global_counter;
+//                lru_global_counter++;
+//                return;
+//            }
+//        }
         // all blocks in the set are valid and not equal to new block tag
         replacement(block, read, 1);
         if (l2size != 0) {
@@ -323,7 +355,6 @@ public class Main{
     }
 
     public static void l2_write(Block block, boolean read, boolean victim){
-        call++;
         if (!read) {
             l2_writes++;
         }
@@ -332,7 +363,7 @@ public class Main{
                 l2cache[block.set_index][i] = block;
                 l2cache[block.set_index][i].valid = true;
                 if(!victim) {
-                    l2cache[block.set_index][i].LRU = global_counter + lru_global_counter;
+                    l2cache[block.set_index][i].LRU = lru_global_counter;
                     lru_global_counter++;
                 }
                 if(!read) {
@@ -345,7 +376,7 @@ public class Main{
                 return;
             } else if (l2cache[block.set_index][i].tag.equals(block.tag)) {
                 l2cache[block.set_index][i].dirty = true;
-                l2cache[block.set_index][i].LRU = global_counter + lru_global_counter;
+                l2cache[block.set_index][i].LRU = lru_global_counter;
                 lru_global_counter++;
                 return;
             }
@@ -447,7 +478,6 @@ public class Main{
 
             line = console.readLine();
             global_counter++;
-            lru_global_counter = 0;
         }
         console.close();
         System.out.println("===== Simulator configuration =====");
@@ -519,6 +549,5 @@ public class Main{
         else {
             System.out.println("m. total memory traffic: " + (l2_read_misses + l2_write_misses + l2_writebacks + direct_mem_write));
         }
-        System.out.println(equal);
     }
 }
